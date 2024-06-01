@@ -353,8 +353,8 @@ namespace PokerUtils
             //出飞机
             else if (result.Item6 > 0)
             {
-                var feiJi = GetContinusMinMax(3, ref result.Item4);
-                ReadPokerCard(feiJi.Item1, feiJi.Item2, ref result.Item4, tipCards);
+                var feiJi = GetContinusMinMax(3, ref result.Item6);
+                ReadPokerCard(feiJi.Item1, feiJi.Item2, ref result.Item6, tipCards);
                 return PokerType.AeroplaneWithNone;
             }
             //出三张
