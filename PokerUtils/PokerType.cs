@@ -29,7 +29,7 @@ namespace PokerUtils
         /// <summary>
         /// 连对
         /// </summary>
-        LiandDui,
+        LianDui,
 
         /// <summary>
         /// 斗地主单出三张牌
