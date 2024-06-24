@@ -604,7 +604,8 @@ namespace PokerUtils
                     //2.2.2 如果没有找到同类型的牌则出炸弹
                     if (tipType == PokerType.None)
                     {
-                        int lastCode = outCardsType == PokerType.Bomb ? GetWithCode(outCards) : 3;
+			tipCards.Clear();//清空前面可能添加了的牌
+			int lastCode = outCardsType == PokerType.Bomb ? GetWithCode(outCards) : 3;
                         if (result.Item7 > 0 && GetBombTip(ref result.Item7, ref lastCode, tipCards))
                         {
                             tipType = PokerType.Bomb;
