@@ -176,7 +176,7 @@ namespace PokerUtils
         /// <param name="currentType">当前玩家出牌类型</param>
         /// <remarks>此方法可以在无需提前知道当前玩家出的牌的类型</remarks>
         /// <returns>true:符合出牌规则；false:不符合出牌规则</returns>
-        public static bool FastCheck(List<PokerCard> current,List<PokerCard> last, PokerType lastType,out PokerType currentType)
+        public bool FastCheck(List<PokerCard> current,List<PokerCard> last, PokerType lastType,out PokerType currentType)
         {
             currentType = PokerType.None;
             if(lastType == PokerType.None) { throw new NotSupportedException("上家出牌类型不能为PokerType.None类型!"); }
@@ -246,9 +246,13 @@ namespace PokerUtils
                         break;
                 }
 
-                return Check(current, currentType, last, lastType); 
+                if(currentType != PokerType.None)
+                {
+                    return Check(current, currentType, last, lastType);
+                }
             }
-            else if((current.Count < last.Count || current.Count > last.Count) && IsBomb(current))
+            
+            if(IsBomb(current))
             {
                 currentType = PokerType.Bomb;
                 return Check(current, currentType, last, lastType);
