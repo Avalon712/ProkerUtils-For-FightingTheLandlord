@@ -1,4 +1,6 @@
 ﻿
+using System.Text;
+
 namespace PokerUtils
 {
     public static class TestHelper
@@ -25,7 +27,7 @@ namespace PokerUtils
                     {
                         int len = random.Next(5, 13);
                         int startCode = random.Next(3, 12 - len + 4);
-                        return LianDui(startCode,startCode+len-1);
+                        return LianDui(startCode, startCode + len - 1);
                     }
                 case PokerType.ThreeWithNone:
                     {
@@ -105,9 +107,71 @@ namespace PokerUtils
             throw new NotSupportedException("不在定义之中的类型");
         }
 
+        public static string GetPokerString(List<PokerCard> cards, bool showOriginalStr = false)
+        {
+            if (showOriginalStr)
+            {
+                return $"[{string.Join(", ", cards)}]";
+            }
+            //♠ ♥ ♣ ♦
+            StringBuilder builder = new StringBuilder();
+            builder.Append('[');
+            for (int i = 0; i < cards.Count; i++)
+            {
+                PokerCard card = cards[i];
+                int code = 3 + (int)card / 4;
+                int index = (int)card - (code - 3) * 4;
+                if (code <= 15)
+                {
+                    switch (index)
+                    {
+                        case 0: builder.Append('♠'); break;
+                        case 1: builder.Append('♥'); break;
+                        case 2: builder.Append('♣'); break;
+                        case 3: builder.Append('♦'); break;
+                    }
+                }
+                switch (code)
+                {
+                    case 11: //J
+                        builder.Append('J');
+                        break;
+                    case 12: //Q
+                        builder.Append('Q');
+                        break;
+                    case 13: //K
+                        builder.Append('K');
+                        break;
+                    case 14: //A
+                        builder.Append('A');
+                        break;
+                    case 15: //2
+                        builder.Append('2');
+                        break;
+                    case 16: // Joker
+                        builder.Append("Joker");
+                        break;
+                    case 17: //King
+                        builder.Append("King");
+                        break;
+                    default:
+                        builder.Append(code);
+                        break;
+                }
+                if (i != cards.Count - 1)
+                {
+                    builder.Append(',');
+                    builder.Append(' ');
+                }
+            }
+            builder.Append(']');
+            return builder.ToString();
+        }
+
+
         public static List<PokerCard> None()
         {
-            List<PokerCard> cards = new(random.Next(0,21));
+            List<PokerCard> cards = new(random.Next(0, 21));
             for (int i = 0; i < cards.Capacity; i++)
             {
                 cards.Add((PokerCard)(random.Next(0, 18)));
@@ -136,12 +200,12 @@ namespace PokerUtils
             return cards;
         }
 
-        public static List<PokerCard> ThreeWith(int code,int withNum)
+        public static List<PokerCard> ThreeWith(int code, int withNum)
         {
             List<PokerCard> cards = new(3 + withNum);
             int with = random.Next(0, 2) == 1 ? random.Next(3, code + 1) : random.Next(code + 1, 16);
-           
-            while(with == code)
+
+            while (with == code)
             {
                 with = random.Next(3, 16);
             }
@@ -156,11 +220,11 @@ namespace PokerUtils
                 }
             }
 
-            if(withNum == 1)
+            if (withNum == 1)
             {
                 cards.Add((PokerCard)((with - 3) * 4 + random.Next(0, 4)));
             }
-            else if(withNum == 2)
+            else if (withNum == 2)
             {
                 cards.Add((PokerCard)((with - 3) * 4 + random.Next(0, 2)));
                 cards.Add((PokerCard)((with - 3) * 4 + random.Next(2, 4)));
@@ -168,12 +232,12 @@ namespace PokerUtils
             return cards;
         }
 
-        public static List<PokerCard> ShunZi(int startCode,int endCode)
+        public static List<PokerCard> ShunZi(int startCode, int endCode)
         {
             List<PokerCard> cards = new List<PokerCard>(endCode - startCode + 1);
             for (int i = startCode; i <= endCode; i++)
             {
-                cards.Add((PokerCard)((i - 3) * 4 + random.Next(0, 4))); 
+                cards.Add((PokerCard)((i - 3) * 4 + random.Next(0, 4)));
             }
             return cards;
         }
@@ -212,23 +276,23 @@ namespace PokerUtils
             return cards;
         }
 
-        public static List<PokerCard> FourWithDouble(int code,int num)
+        public static List<PokerCard> FourWithDouble(int code, int num)
         {
             List<PokerCard> cards = new(4 + 2 * num);
 
-            if(num == 1)
+            if (num == 1)
             {
                 while (cards.Count != 2)
                 {
                     int with = random.Next(3, 16);
-                    if (with != code )
+                    if (with != code)
                     {
                         cards.Add((PokerCard)((with - 3) * 4 + random.Next(0, 2)));
                         cards.Add((PokerCard)((with - 3) * 4 + random.Next(2, 4)));
                     }
                 }
             }
-            else if(num == 2)
+            else if (num == 2)
             {
                 while (cards.Count != 4)
                 {
@@ -243,7 +307,7 @@ namespace PokerUtils
                     }
                 }
             }
-           
+
 
             for (int i = 0; i < 4; i++)
             {
@@ -270,7 +334,7 @@ namespace PokerUtils
             return cards;
         }
 
-        public static List<PokerCard> AeroplaneWithSingle(int startCode,int endCode)
+        public static List<PokerCard> AeroplaneWithSingle(int startCode, int endCode)
         {
             List<PokerCard> cards = AeroplaneWithNone(startCode, endCode);
             int withNum = endCode - startCode + 1;
@@ -279,7 +343,7 @@ namespace PokerUtils
                 List<int> codes = new List<int>(withNum);
                 while (codes.Count < withNum)
                 {
-                    int with = random.Next(0,100)%2==0 ? random.Next(3, startCode) : random.Next(endCode + 1, 16);
+                    int with = random.Next(0, 100) % 2 == 0 ? random.Next(3, startCode) : random.Next(endCode + 1, 16);
                     if (!codes.Contains(with)) { codes.Add(with); }
                 }
                 for (int i = 0; i < codes.Count; i++)

@@ -12,7 +12,7 @@ namespace PokerUtils
 
         static PokerHelper()
         {
-            CARDS = new List<PokerCard>(54) 
+            CARDS = new List<PokerCard>(54)
             {
                 PokerCard.Spade_3,PokerCard.Heart_3,PokerCard.Club_3,PokerCard.Diamond_3,
                 PokerCard.Spade_4,PokerCard.Heart_4,PokerCard.Club_4,PokerCard.Diamond_4,
@@ -41,10 +41,10 @@ namespace PokerUtils
         public static List<PokerCard>[] Shuffle(out PokerCard[] remaining)
         {
             //每人最多20张牌
-            List<PokerCard>[] results = new[]{ new List<PokerCard>(20), new List<PokerCard>(20), new List<PokerCard>(20) };
+            List<PokerCard>[] results = new[] { new List<PokerCard>(20), new List<PokerCard>(20), new List<PokerCard>(20) };
 
             Random random = new Random((int)DateTime.Now.Ticks);
-            
+
             //洗牌算法，随着洗牌次数的增加将趋近完全随机化
             for (int i = CARDS.Count - 1; i >= 0; i--)
             {
@@ -70,10 +70,10 @@ namespace PokerUtils
         /// <param name="remaining">剩余的3张牌</param>
         /// <param name="controlFactor">炸弹控制参数，此参数越小炸弹越多</param>
         /// <returns>3副初始牌，每副17张</returns>
-        public static List<PokerCard>[] NoShuffle(out PokerCard[] remaining,int controlFactor=50)
+        public static List<PokerCard>[] NoShuffle(out PokerCard[] remaining, int controlFactor = 50)
         {
             //超过100已经接近完全随机了
-            if(controlFactor >= 100) { return Shuffle(out remaining); }
+            if (controlFactor >= 100) { return Shuffle(out remaining); }
 
             //每人最多20张牌
             List<PokerCard>[] results = new[] { new List<PokerCard>(20), new List<PokerCard>(20), new List<PokerCard>(20) };
@@ -85,7 +85,7 @@ namespace PokerUtils
 
             //有规则的随机打乱：炸弹随机交换
             int switchNum = random.Next(5, 20); //随机交换次数
-            while(switchNum > 0)
+            while (switchNum > 0)
             {
                 int s1 = random.Next(3, 16); //牌码
                 int s2 = random.Next(3, 16);
@@ -94,16 +94,16 @@ namespace PokerUtils
                 int c2 = (s2 - 3) * 4;
                 for (int j = 0; j < 4; j++)
                 {
-                    PokerCard poker = CARDS[c1+j];
-                    CARDS[c1+j] = CARDS[c2+j];
-                    CARDS[c2+j] = poker;
+                    PokerCard poker = CARDS[c1 + j];
+                    CARDS[c1 + j] = CARDS[c2 + j];
+                    CARDS[c2 + j] = poker;
                 }
                 switchNum--;
             }
             //随机交换
             switchNum = random.Next(0, controlFactor < 0 ? 0 : controlFactor);
 
-            while(switchNum > 0)
+            while (switchNum > 0)
             {
                 int r1 = random.Next(0, 54);
                 int r2 = random.Next(0, 54);
@@ -116,7 +116,8 @@ namespace PokerUtils
             remaining = new PokerCard[3] { CARDS[0], CARDS[1], CARDS[2] };
 
             //一次性每人17张牌
-            for (int i = 3; i < CARDS.Count; i++) {
+            for (int i = 3; i < CARDS.Count; i++)
+            {
                 results[(i - 3) / 17].Add(CARDS[i]);
             }
 
@@ -140,16 +141,16 @@ namespace PokerUtils
         /// <param name="lastType">上一个玩家出的牌的类型</param>
         /// <remarks>这种方式需要提前指定当前玩家出的牌的类型以及上家出的牌的类型</remarks>
         /// <returns>true:符合出牌规则；false:不符合出牌规则</returns>
-        public static bool Check(List<PokerCard> current,PokerType currentType,List<PokerCard> last,PokerType lastType)
+        public static bool Check(List<PokerCard> current, PokerType currentType, List<PokerCard> last, PokerType lastType)
         {
             //不符合规则的牌型
-            if(currentType == PokerType.None || lastType == PokerType.None) { return false; }
+            if (currentType == PokerType.None || lastType == PokerType.None) { return false; }
 
             //同一类型比较，牌数必须一致
-            if(currentType == lastType && current.Count == last.Count)
+            if (currentType == lastType && current.Count == last.Count)
             {
                 //对于单牌、顺子、连对、对子的情况比较元素差的和的大小
-                if(currentType == PokerType.Single || currentType == PokerType.Double || currentType == PokerType.ShunZi || currentType== PokerType.LianDui)
+                if (currentType == PokerType.Single || currentType == PokerType.Double || currentType == PokerType.ShunZi || currentType == PokerType.LianDui)
                 {
                     int sum = 0;
                     for (int i = 0; i < current.Count; i++)
@@ -162,7 +163,7 @@ namespace PokerUtils
             }
 
             //不是同一类型则必须是炸弹牌型
-            return currentType - lastType > 0 && (int)currentType >= 19 ; 
+            return currentType - lastType > 0 && (int)currentType >= 19;
         }
 
         //-----------------------------------------------------------------------------------------------------------
@@ -176,14 +177,14 @@ namespace PokerUtils
         /// <param name="currentType">当前玩家出牌类型</param>
         /// <remarks>此方法可以在无需提前知道当前玩家出的牌的类型</remarks>
         /// <returns>true:符合出牌规则；false:不符合出牌规则</returns>
-        public bool FastCheck(List<PokerCard> current,List<PokerCard> last, PokerType lastType,out PokerType currentType)
+        public static bool FastCheck(List<PokerCard> current, List<PokerCard> last, PokerType lastType, out PokerType currentType)
         {
             currentType = PokerType.None;
-            if(lastType == PokerType.None) { throw new NotSupportedException("上家出牌类型不能为PokerType.None类型!"); }
+            if (lastType == PokerType.None) { throw new NotSupportedException("上家出牌类型不能为PokerType.None类型!"); }
 
             if (IsKingBomb(current)) { currentType = PokerType.KingBomb; return true; }
 
-            if(current.Count == last.Count)
+            if (current.Count == last.Count)
             {
                 switch (lastType)
                 {
@@ -194,13 +195,13 @@ namespace PokerUtils
                         if (IsDouble(current)) { currentType = PokerType.Double; }
                         break;
                     case PokerType.ShunZi:
-                        if (IsShunZi(current)){ currentType = PokerType.ShunZi;}
+                        if (IsShunZi(current)) { currentType = PokerType.ShunZi; }
                         break;
                     case PokerType.LianDui:
-                        if(IsLiandDui(current)){ currentType = PokerType.LianDui; }
+                        if (IsLiandDui(current)) { currentType = PokerType.LianDui; }
                         break;
                     case PokerType.ThreeWithNone:
-                        if (IsThreeWithNone(current)){ currentType = PokerType.ThreeWithNone; }
+                        if (IsThreeWithNone(current)) { currentType = PokerType.ThreeWithNone; }
                         break;
                     case PokerType.ThreeWithOne:
                         if (IsThreeWithOne(current)) { currentType = PokerType.ThreeWithOne; }
@@ -217,42 +218,17 @@ namespace PokerUtils
                     case PokerType.FourWithTwoDouble:
                         if (IsFourWithTwoDouble(current)) { currentType = PokerType.FourWithTwoDouble; }
                         break;
-                    case PokerType.AeroplaneWithNone:
-                        if (IsAeroplaneWithNone(current)) { currentType = PokerType.AeroplaneWithNone; }
-                        break;
-                    case PokerType.AeroplaneWithTwo:
-                        if (IsAeroplaneWithTwo(current)) { currentType = PokerType.AeroplaneWithTwo; }
-                        break;
-                    case PokerType.AeroplaneWithThree:
-                        if (IsAeroplaneWithThree(current)) { currentType = PokerType.AeroplaneWithThree; }
-                        break;
-                    case PokerType.AeroplaneWithFour:
-                        if (IsAeroplaneWithFour(current)) { currentType = PokerType.AeroplaneWithFour; }
-                        break;
-                    case PokerType.AeroplaneWithFive:
-                        if (IsAeroplaneWithFive(current)) { currentType = PokerType.AeroplaneWithFive; }
-                        break;
-                    case PokerType.AeroplaneWithTwoDouble:
-                        if (IsAeroplaneWithTwoDouble(current)) { currentType = PokerType.AeroplaneWithTwoDouble; }
-                        break;
-                    case PokerType.AeroplaneWithThreeDouble:
-                        if (IsAeroplaneWithThreeDouble(current)) { currentType = PokerType.AeroplaneWithThreeDouble; }
-                        break;
-                    case PokerType.AeroplaneWithFourDouble:
-                        if (IsAeroplaneWithFourDouble(current)) { currentType = PokerType.AeroplaneWithFourDouble; }
-                        break;
                     case PokerType.Bomb:
                         if (IsBomb(current)) { currentType = PokerType.Bomb; }
                         break;
+                    default:
+                        if (TryGetAeroplaneType(current, out currentType)) { }
+                        break;
                 }
 
-                if(currentType != PokerType.None)
-                {
-                    return Check(current, currentType, last, lastType);
-                }
+                return Check(current, currentType, last, lastType);
             }
-            
-            if(IsBomb(current))
+            else if ((current.Count < last.Count || current.Count > last.Count) && IsBomb(current))
             {
                 currentType = PokerType.Bomb;
                 return Check(current, currentType, last, lastType);
@@ -282,32 +258,25 @@ namespace PokerUtils
                 else if (IsBomb(cards)) { return PokerType.Bomb; }
                 else if (IsKingBomb(cards)) { return PokerType.KingBomb; }
             }
-            else if(!isDouble && count <= 5)
+            else if (!isDouble && count <= 5)
             {
                 if (IsSingle(cards)) { return PokerType.Single; }
                 else if (IsThreeWithNone(cards)) { return PokerType.ThreeWithNone; }
                 else if (IsThreeWihtDouble(cards)) { return PokerType.ThreeWihtDouble; }
             }
 
-            if(count >= 5)
+            if (count >= 5)
             {
                 if (IsShunZi(cards)) { return PokerType.ShunZi; }
                 else if (IsLiandDui(cards)) { return PokerType.LianDui; }
                 else if (IsFourWithTwo(cards)) { return PokerType.FourWithTwo; }
                 else if (IsFourWithDouble(cards)) { return PokerType.FourWithDouble; }
                 else if (IsFourWithTwoDouble(cards)) { return PokerType.FourWithTwoDouble; }
-                else if (IsAeroplaneWithNone(cards)) { return PokerType.AeroplaneWithNone; }
-                else if (IsAeroplaneWithTwo(cards)) { return PokerType.AeroplaneWithTwo; }
             }
 
-            if (count >= 10)
+            if (count >= 8 && TryGetAeroplaneType(cards, out PokerType pokerType))
             {
-                if (IsAeroplaneWithThree(cards)) { return PokerType.AeroplaneWithThree; }
-                else if (IsAeroplaneWithFour(cards)) { return PokerType.AeroplaneWithFour; }
-                else if (IsAeroplaneWithFive(cards)) { return PokerType.AeroplaneWithFive; }
-                else if (IsAeroplaneWithTwoDouble(cards)) { return PokerType.AeroplaneWithTwoDouble; }
-                else if (IsAeroplaneWithThreeDouble(cards)) { return PokerType.AeroplaneWithThreeDouble; }
-                else if (IsAeroplaneWithFourDouble(cards)) { return PokerType.AeroplaneWithFourDouble; }
+                return pokerType;
             }
 
             return PokerType.None;
@@ -608,8 +577,7 @@ namespace PokerUtils
                     //2.2.2 如果没有找到同类型的牌则出炸弹
                     if (tipType == PokerType.None)
                     {
-			tipCards.Clear();//清空前面可能添加了的牌
-			int lastCode = outCardsType == PokerType.Bomb ? GetWithCode(outCards) : 3;
+                        int lastCode = outCardsType == PokerType.Bomb ? GetWithCode(outCards) : 3;
                         if (result.Item7 > 0 && GetBombTip(ref result.Item7, ref lastCode, tipCards))
                         {
                             tipType = PokerType.Bomb;
@@ -719,6 +687,7 @@ namespace PokerUtils
         /// <summary>
         /// 从指定的连续牌中获取最小和最大值
         /// </summary>
+        /// <returns>(min, max)</returns>
         private static ValueTuple<int, int> GetContinusMinMax(int startCode, ref long codes)
         {
             int min = 0, max = 0;
@@ -777,11 +746,11 @@ namespace PokerUtils
             long bomb = 15; //64位才能记下所有炸弹 //从最小的炸弹四个3开始 ==> 4个3转为位信息为 1111 => 15
             int code = 3; // 3、4、5、6...J、Q、K、A、2 、小王、大王 => 牌码
 
-            long temp; int count = 0;
+            long temp; int count;
             while (code <= 17)
             {
                 temp = (codes & bomb);
-                CountOne(temp, ref count);
+                count = CountOne(temp);
 
                 switch (count)
                 {
@@ -802,7 +771,6 @@ namespace PokerUtils
 
                 bomb <<= 4; //左移4位得到下一个炸弹
                 code++;
-                count = 0;
             }
 
             //获得顺子牌
@@ -849,14 +817,16 @@ namespace PokerUtils
         /// </summary>
         /// <param name="temp">要统计的值</param>
         /// <returns>统计出的数量</returns>
-        private static void CountOne(long temp, ref int count)
+        private static int CountOne(long temp)
         {
+            int count = 0;
             //这个算法很简单只需要每次将这个temp值的最右边的1置为0即可
             while (temp > 0)
             {
                 temp &= temp - 1;
                 count++;
             }
+            return count;
         }
 
         /// <summary>
@@ -908,6 +878,15 @@ namespace PokerUtils
                 code++;
                 count = 0;
             }
+        }
+
+        /// <summary>
+        /// 判断一个数的二进制形式是否全是相连的1组成，即0011111100这种形式
+        /// </summary>
+        private static bool IsContinusOne(long num, int min, int max)
+        {
+            //等比数列求和
+            return num == ((1 << (max + 1)) - (1 << min));
         }
 
         #endregion
@@ -1372,19 +1351,19 @@ namespace PokerUtils
         /// </summary>
         private static bool IsShunZi(List<PokerCard> cards)
         {
-            if(cards.Count >= 5)
+            if (cards.Count >= 5)
             {
-                int tmp = 0,temp, code, min=99;
+                int shunZi = 0, temp, code, min = 99;
                 for (int i = 0; i < cards.Count; i++)
                 {
                     code = 3 + ((int)cards[i]) / 4;
-                    if(code < min) { min = code; }
+                    if (code < min) { min = code; }
                     temp = 1 << code;
-                    if((tmp & temp) != 0 || code>14) { return false; } //顺子不能包含王和2
-                    tmp |= temp;
+                    if ((shunZi & temp) != 0 || code > 14) { return false; } //顺子不能包含王和2
+                    shunZi |= temp;
                 }
-                
-                return (tmp >>= (min + cards.Count)) == 0;
+
+                return IsContinusOne(shunZi, min, min + cards.Count - 1);
             }
             return false;
         }
@@ -1395,19 +1374,29 @@ namespace PokerUtils
         private static bool IsLiandDui(List<PokerCard> cards)
         {
             int count = cards.Count;
+            int shunZi0 = 0, shunZi1 = 0, min = 99;
             if (count >= 6 && count % 2 == 0)
             {
-                int code, min = 99,max=0,sum=0;
                 for (int i = 0; i < cards.Count; i++)
                 {
-                    code = 3 + ((int)cards[i]) / 4;
-                    sum += code;
-                    if (code > 14) { return false; } //不能包含王和2
+                    int code = 3 + ((int)cards[i]) / 4;
+                    if (code >= 14) return false;
                     if (code < min) { min = code; }
-                    if(code > max) { max = code; }
+                    int temp = 1 << code;
+                    if ((shunZi0 & temp) == 0)
+                    {
+                        shunZi0 |= temp;
+                    }
+                    else if ((shunZi1 & temp) == 0)
+                    {
+                        shunZi1 |= temp;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
-
-                return (min + max) * cards.Count /2 == sum;
+                return shunZi0 == shunZi1 && IsContinusOne(shunZi0, min, min + cards.Count / 2 - 1);
             }
             return false;
         }
@@ -1417,7 +1406,7 @@ namespace PokerUtils
         /// </summary>
         private static bool IsThreeWithNone(List<PokerCard> cards)
         {
-            return cards.Count==3 && IsWith(cards,3);
+            return cards.Count == 3 && IsWith(cards, 3);
         }
 
         /// <summary>
@@ -1433,7 +1422,7 @@ namespace PokerUtils
         /// </summary>
         private static bool IsThreeWihtDouble(List<PokerCard> cards)
         {
-            bool f= cards.Count == 5 && IsWith(cards, 4);
+            bool f = cards.Count == 5 && IsWith(cards, 4);
             if (f)
             {
                 int code, min = 99, max = 0, sum = 0;
@@ -1474,11 +1463,11 @@ namespace PokerUtils
             bool f = cards.Count == 8 && IsWith(cards, 6);
             if (f) //由于四带两对和飞机带两张的条件一致，需要再进一步杨筛选
             {
-                int tmp = 0, code,count=0;
+                int tmp = 0, code, count = 0;
                 for (int i = 0; i < cards.Count; i++)
                 {
                     code = 3 + ((int)cards[i]) / 4;
-                    tmp |= 1<<code;
+                    tmp |= 1 << code;
                 }
                 while (tmp != 0)
                 {
@@ -1490,69 +1479,6 @@ namespace PokerUtils
             return f;
         }
 
-        /// <summary>
-        /// 飞机什么都不带
-        /// </summary>
-        private static bool IsAeroplaneWithNone(List<PokerCard> cards)
-        {
-            return cards.Count % 3 == 0 && IsWith(cards, cards.Count);
-        }
-
-        /// <summary>
-        /// 飞机带两张牌
-        /// </summary>
-        private static bool IsAeroplaneWithTwo(List<PokerCard> cards)
-        {
-            return cards.Count == 8 && IsAeroplaneWithWings(cards, 6);
-        }
-
-        /// <summary>
-        /// 飞机带三张单牌
-        /// </summary>
-        private static bool IsAeroplaneWithThree(List<PokerCard> cards)
-        {
-            return cards.Count == 12 && IsAeroplaneWithWings(cards, 9);
-        }
-
-        /// <summary>
-        /// 飞机带四张单牌
-        /// </summary>
-        private static bool IsAeroplaneWithFour(List<PokerCard> cards)
-        {
-            return cards.Count == 16 && IsAeroplaneWithWings(cards, 12);
-        }
-
-        /// <summary>
-        /// 飞机带五张单牌
-        /// </summary>
-        private static bool IsAeroplaneWithFive(List<PokerCard> cards)
-        {
-            return cards.Count == 20 && IsAeroplaneWithWings(cards, 15);
-        }
-
-        /// <summary>
-        /// 飞机带两对
-        /// </summary>
-        private static bool IsAeroplaneWithTwoDouble(List<PokerCard> cards)
-        {
-            return cards.Count == 10 && IsAeroplaneWithWings(cards, 8);
-        }
-
-        /// <summary>
-        /// 飞机带三对
-        /// </summary>
-        private static bool IsAeroplaneWithThreeDouble(List<PokerCard> cards)
-        {
-            return cards.Count == 15 && IsAeroplaneWithWings(cards, 12);
-        }
-
-        /// <summary>
-        /// 飞机带四对
-        /// </summary>
-        private static bool IsAeroplaneWithFourDouble(List<PokerCard> cards)
-        {
-            return cards.Count == 20 && IsAeroplaneWithWings(cards, 16);
-        }
 
         /// <summary>
         /// 炸弹
@@ -1579,7 +1505,7 @@ namespace PokerUtils
         /// 2个相同的牌可以统计出的次数为1;
         /// 其它为0
         /// </summary>
-        private static bool IsWith(List<PokerCard> cards,int count)
+        private static bool IsWith(List<PokerCard> cards, int count)
         {
             int r = 0, n = 0, p, k, tmp, code;
             for (int i = 0; i < cards.Count; i++)
@@ -1597,11 +1523,80 @@ namespace PokerUtils
         }
 
         /// <summary>
+        /// 判断一个数是否为三带一，三带二（三带一对），三什么都不带，四带二（两张单品或一对），四带四（两对），四什么都不带
+        /// </summary>
+        /// <param name="num3Or4">3带或四带</param>
+        /// <param name="withCount">带的牌的数量</param>
+        private static bool IsWith(List<PokerCard> cards, int num3Or4, int withCount)
+        {
+            if (cards.Count == num3Or4 + withCount)
+            {
+
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 获取一个飞机牌型
+        /// </summary>
+        private static bool TryGetAeroplaneType(List<PokerCard> cards, out PokerType pokerType)
+        {
+            pokerType = PokerType.None;
+            int air0 = 0, air1 = 0, air2 = 0, min = 99, max = 0;
+            for (int i = 0; i < cards.Count; i++)
+            {
+                int code = 3 + ((int)cards[i]) / 4;
+                if (code >= 14) return false;
+                if (code < min) { min = code; }
+                if (code > max) { max = code; }
+                int temp = 1 << code;
+                if ((air0 & temp) == 0)
+                {
+                    air0 |= temp;
+                }
+                else if ((air1 & temp) == 0)
+                {
+                    air1 |= temp;
+                }
+                else if ((air2 & temp) == 0)
+                {
+                    air2 |= temp;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            int air = air0 & air1 & air2;
+
+            if (IsContinusOne(air, min, max))
+            {
+                int withCount = CountOne(air0 & air) + 2 * CountOne(air1 & air);
+                if (withCount == 0)
+                {
+                    pokerType = PokerType.AeroplaneWithNone;
+                }
+                else if (withCount == (max - min + 1) && withCount <= 5)
+                {
+                    //12 --> AeroplaneWithTwo
+                    pokerType = (PokerType)(withCount + 10);
+                }
+                else if (withCount == 2 * (max - min + 1)) //4 6 8
+                {
+                    //16 --> AeroplaneWithTwoDouble
+                    pokerType = (PokerType)(withCount + 12);
+                }
+            }
+
+            return pokerType != PokerType.None;
+        }
+
+        /// <summary>
         /// 判断飞机带翅膀
         /// </summary>
-        private static bool IsAeroplaneWithWings(List<PokerCard> cards,int count)
+        private static bool IsAeroplaneWithWings(List<PokerCard> cards, int count)
         {
-            int r = 0, n = 0, p, k, tmp, code, min=100, max=0;
+            int r = 0, n = 0, p, k, tmp, code, min = 100, max = 0;
             for (int i = 0; i < cards.Count; i++)
             {
                 code = 3 + ((int)cards[i]) / 4;
@@ -1610,22 +1605,22 @@ namespace PokerUtils
                 k = (n & tmp) >> code;
                 count -= p + k;
                 if (p == 1) { n |= tmp; }
-                if (k == 1) 
-                { 
+                if (k == 1)
+                {
                     n &= ~tmp;
-                    if(code > max) { max = code; }
-                    if(code < min) { min = code; }
+                    if (code > max) { max = code; }
+                    if (code < min) { min = code; }
                 }
                 r |= tmp;
             }
             code = 0;
             for (int i = min; i <= max; i++)
-                code += 1 << i; 
+                code += 1 << i;
             return count == 0 && (r & code) == code; //判断是否连续
         }
 
         /// <summary>
-        /// 对扑克牌中相同牌的数量大于2的求和
+        /// 对扑克牌中相同的牌且数量大于2的牌进行求和
         /// </summary>
         private static int AddOnlyDuplicateGreater2(List<PokerCard> cards)
         {
@@ -1644,7 +1639,7 @@ namespace PokerUtils
                     n |= tmp;
                 }
                 r |= tmp;
-              
+
             }
             return sum;
         }

@@ -1,4 +1,6 @@
 ﻿
+using System.Text;
+
 namespace PokerUtils
 {
     //[MemoryDiagnoser]
@@ -35,20 +37,25 @@ namespace PokerUtils
 
         */
 
+        //要Be
+
         //[Benchmark]
         public void TestPlay()
         {
+            Console.OutputEncoding = Encoding.UTF8;
+
             int current = 0; //当前出牌玩家
             PokerType lastOutType = PokerType.None; //上家出牌的类型
             int last = 0;//上次玩牌的玩家
-            // int round = 1; //当前回合数
-            //int count = 3; //统计是否到了下一个回合
+
+            int round = 1; //当前回合数
+            int count = 3; //统计是否到了下一个回合
 
             while (true)
             {
-                //if(count == 3) { Console.WriteLine($"第{round}回合"); round++; }
+                if (count == 3) { Console.WriteLine($"\n=================第{round}回合================="); round++; }
 
-                // results[current].Sort((p1, p2) => p1 - p2); //方便查看
+                results[current].Sort((p1, p2) => p1 - p2); //方便查看
 
                 //如果上次没有人要，则继续该当前玩家出牌
                 if (last == current)
@@ -56,25 +63,25 @@ namespace PokerUtils
                     lastOutCards.Clear();
                 }
 
-                //Console.WriteLine($"玩家{current}{(current == 0 ? "(地主)" : "农民")}回合阶段");
+                Console.WriteLine($"玩家{current}{(current == 0 ? "(地主)" : "农民")}回合阶段");
 
                 if (lastOutCards.Count == 0)
                 {
-                    Console.WriteLine("出牌前的手牌: " + DebugHelper.GetPokerString(results[current]));
+                    Console.WriteLine("出牌前的手牌: " + TestHelper.GetPokerString(results[current]));
 
                     lastOutType = PokerHelper.GetTipCards(results[current], tipCards);
                     lastOutCards.AddRange(tipCards);
                     results[current].RemoveAll(p => tipCards.Contains(p));
 
-                    //Console.WriteLine($"当前出牌为({lastOutType}): " + GetPokerString(tipCards));
-                    //Console.WriteLine("出牌后的手牌: " + GetPokerString(results[current]));
-
+                    Console.WriteLine($"当前出牌为({lastOutType}): " + TestHelper.GetPokerString(tipCards));
+                    Console.WriteLine("出牌后的手牌: " + TestHelper.GetPokerString(results[current]));
+                    Console.WriteLine();
                     tipCards.Clear();
                     last = current;
                 }
                 else
                 {
-                    //Console.WriteLine("出牌前的手牌: " + GetPokerString(results[current]));
+                    Console.WriteLine("出牌前的手牌: " + TestHelper.GetPokerString(results[current]));
 
                     PokerType currentType;
                     PokerHelper.GetTipCards(results[current], lastOutCards, lastOutType, tipCards, out currentType);
@@ -90,31 +97,29 @@ namespace PokerUtils
                         lastOutType = currentType;
                     }
 
-                    //Console.WriteLine($"当前出牌为({currentType})[{(r ? "√" : "×")}]: " + GetPokerString(tipCards));
-                    //Console.WriteLine("出牌后的手牌: " + GetPokerString(results[current]));
+                    Console.WriteLine($"当前出牌为({currentType})[{(r ? "√" : "×")}]: " + TestHelper.GetPokerString(tipCards));
+                    Console.WriteLine("出牌后的手牌: " + TestHelper.GetPokerString(results[current]));
+                    Console.WriteLine();
                     tipCards.Clear();
                 }
 
-                //count--;
-                //if(count == 0) { count = 3; Console.WriteLine(); }
+                count--;
+                if (count == 0) { count = 3; Console.WriteLine(); }
 
                 current = (current + 1) % 3; //下一家出牌
                 for (int i = 0; i < results.Length; i++)
                 {
                     if (results[i].Count == 0)
                     {
-                        //Console.WriteLine($"对局结束，玩家{i}{(i == 0 ? "(地主)" : "农民")}胜利");
+                        Console.WriteLine($"==============对局结束! 玩家{i}{(i == 0 ? "(地主)" : "农民")}胜利===============");
                         return;
                     }
                 }
             }
 
+
         }
 
-        public static string GetPokerString(List<PokerCard> cards)
-        {
-            return "[ " + string.Join(", ", cards) + " ]";
-        }
     }
 
 
