@@ -231,41 +231,66 @@ private static bool IsWith(List<PokerCard> cards,int count)
 
 #### 飞机
 
-   要看飞机这种牌型，就要先看飞机这种牌型的特点，先看什么都不带的：333/444，如果将牌码写入到int值中那么一定是连续的，因此在这一步的基础上再统计出为1的次数就ok了。思想和前面三带、四带还是很像的。OK，先看源码，再讲解：
-
 ```cs
 /// <summary>
-/// 判断飞机带翅膀
+/// 获取一个飞机牌型
 /// </summary>
-private static bool IsAeroplaneWithWings(List<PokerCard> cards,int count)
+private static bool TryGetAeroplaneType(List<PokerCard> cards, out PokerType pokerType)
 {
-    int r = 0, n = 0, p, k, tmp, code, min=100, max=0;
+    pokerType = PokerType.None;
+    int air0 = 0, air1 = 0, air2 = 0, min = 99, max = 0;
     for (int i = 0; i < cards.Count; i++)
     {
-        code = 3 + ((int)cards[i]) / 4;
-        tmp = 1 << code;
-        p = (r & tmp) >> code; //判断第code位上是否为1
-        k = (n & tmp) >> code;
-        count -= p + k;
-        if (p == 1) { n |= tmp; }
-        if (k == 1) 
-        { 
-            n &= ~tmp;
-            if(code > max) { max = code; }
-            if(code < min) { min = code; }
+        int code = 3 + ((int)cards[i]) / 4;
+        if (code >= 14) return false;
+        if (code < min) { min = code; }
+        if (code > max) { max = code; }
+        int temp = 1 << code;
+        if ((air0 & temp) == 0)
+        {
+            air0 |= temp;
         }
-        r |= tmp;
+        else if ((air1 & temp) == 0)
+        {
+            air1 |= temp;
+        }
+        else if ((air2 & temp) == 0)
+        {
+            air2 |= temp;
+        }
+        else
+        {
+            return false;
+        }
     }
-    code = 0;
-    for (int i = min; i <= max; i++)
-        code += 1 << i; 
-    return count == 0 && (r & code) == code; //判断是否连续
+    int air = air0 & air1 & air2;
+
+    if (IsContinusOne(air, min, max))
+    {
+        int withCount = CountOne(air0 & air) + 2 * CountOne(air1 & air);
+        if (withCount == 0)
+        {
+            pokerType = PokerType.AeroplaneWithNone;
+        }
+        else if (withCount == (max - min + 1) && withCount <= 5)
+        {
+            //12 --> AeroplaneWithTwo
+            pokerType = (PokerType)(withCount + 10);
+        }
+        else if (withCount == 2 * (max - min + 1)) //4 6 8
+        {
+            //16 --> AeroplaneWithTwoDouble
+            pokerType = (PokerType)(withCount + 12);
+        }
+    }
+
+    return pokerType != PokerType.None;
 }
 ```
 
-可以看到除了同前面那样要统计出次数外，还有统计牌码相同而且数量等于3的牌的牌码的最小值和最大值，之后判断这些位是否连续。
+这段代码很好理解，建议可以自己找一个列子跟着算法走一遍就理解了。
 
-有了这个算法基础后，飞机带y和飞机带y对，这种牌型都很好判断了；飞机不带，即y=0，那么其牌数一定是3的整数倍同时牌数大于等于6，之后count值=牌数；飞机带y张单牌时（2<=y<=5）时其count=y*3；飞机带y对时（2<=y<=4)，count=y*3+y。
+
 
 ### 如何判断玩家出牌是否符合规则
 
